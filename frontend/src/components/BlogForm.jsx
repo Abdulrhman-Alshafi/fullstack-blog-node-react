@@ -13,7 +13,6 @@ export default function BlogForm({ blog, onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]); // all tags from backend with _id and name
 
-  // Load categories, tags, and initialize form
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,7 +101,7 @@ export default function BlogForm({ blog, onSuccess }) {
         required
       />
       <textarea
-        placeholder="Content (HTML allowed)"
+        placeholder="Content"
         rows="10"
         value={formData.content}
         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
