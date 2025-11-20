@@ -6,8 +6,8 @@ import {
   getBlogs,
   getMyBlogs,
   updateBlog,
-} from "../controllers/blogController";
-import { protect } from "../middleware/auth";
+} from "../controllers/blogController.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 

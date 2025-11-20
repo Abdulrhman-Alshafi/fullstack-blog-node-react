@@ -1,12 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
-import connectDB from "./config/db";
-import errorHandler from "./middleware/errorHandler";
-import authRoutes from "./routes/authRoutes";
-import blogRoutes from "./routes/blogRoutes";
-import commentRoutes from "./routes/commentRoutes";
-import categoryRoutes from "./routes/categoryRoutes";
-import tagRoutes from "./routes/tagRoutes";
+import connectDB from "./config/db.js";
+import errorHandler from "./middleware/errorHandler.js";
+import authRoutes from "./routes/authRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import tagRoutes from "./routes/tagRoutes.js";
 
 dotenv.config();
 connectDB();
