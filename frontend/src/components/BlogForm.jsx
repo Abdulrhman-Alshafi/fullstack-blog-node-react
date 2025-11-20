@@ -6,13 +6,14 @@ export default function BlogForm({ blog, onSuccess }) {
     title: "",
     content: "",
     category: "",
-    tags: [],
+    tags: [], // this will store **tag names** for input
     image: "",
   });
 
   const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState([]); // all tags from backend with _id and name
 
+  // Load categories, tags, and initialize form
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,7 +32,7 @@ export default function BlogForm({ blog, onSuccess }) {
         title: blog.title,
         content: blog.content,
         category: blog.category?._id || "",
-        tags: blog.tags.map((t) => t._id) || [],
+        tags: blog.tags.map((t) => t.name) || [], // <-- display tag names
         image: blog.image || "",
       });
     }
@@ -40,45 +41,34 @@ export default function BlogForm({ blog, onSuccess }) {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Step 1: Resolve existing tags + create missing ones
+      // Convert tag names to IDs (create new tags if necessary)
       const tagIds = await Promise.all(
         formData.tags.map(async (name) => {
           if (!name.trim()) return null;
 
-          // Look for existing tag (case-insensitive)
           const normalizedName = name.trim().toLowerCase();
           const existingTag = tags.find(
             (t) => t.name.toLowerCase() === normalizedName
           );
 
-          if (existingTag) {
-            return existingTag._id;
-          }
+          if (existingTag) return existingTag._id;
 
-          // If not found → create new tag
-          try {
-            const newTagRes = await apiFetch("/tags", {
-              method: "POST",
-              body: JSON.stringify({
-                name: name.trim(),
-                slug: name.trim().toLowerCase().replace(/\s+/g, "-"), // simple slug
-              }),
-            });
-            // Update local tags list so future matches work without refetch
-            setTags((prev) => [...prev, newTagRes]);
-            return newTagRes._id;
-          } catch (err) {
-            console.error(`Failed to create tag: ${name}`, err);
-            return null;
-          }
+          // Create new tag if it doesn't exist
+          const newTagRes = await apiFetch("/tags", {
+            method: "POST",
+            body: JSON.stringify({
+              name: name.trim(),
+              slug: name.trim().toLowerCase().replace(/\s+/g, "-"),
+            }),
+          });
+          setTags((prev) => [...prev, newTagRes]); // update local tags list
+          return newTagRes._id;
         })
       );
 
-      const validTagIds = tagIds.filter(Boolean);
-
       const payload = {
         ...formData,
-        tags: validTagIds,
+        tags: tagIds.filter(Boolean), // send only valid IDs
         category: formData.category || null,
       };
 
@@ -99,10 +89,6 @@ export default function BlogForm({ blog, onSuccess }) {
       alert("Error saving blog");
       console.error(err);
     }
-  };
-  const handleTagChange = (e) => {
-    const selectedOptions = [...e.target.selectedOptions];
-    setFormData({ ...formData, tags: selectedOptions.map((o) => o.value) });
   };
 
   return (
@@ -145,7 +131,7 @@ export default function BlogForm({ blog, onSuccess }) {
       <input
         type="text"
         placeholder="Enter tags separated by commas"
-        value={formData.tags.join(", ")}
+        value={formData.tags.join(", ")} // display names, not IDs
         onChange={(e) =>
           setFormData({
             ...formData,
