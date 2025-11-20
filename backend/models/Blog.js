@@ -25,7 +25,7 @@ const blogSchema = mongoose.Schema(
         ref: "Tag",
       },
     ],
-    images: { type: String },
+    image: { type: String },
     published: {
       type: Boolean,
       default: true,

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 export default function BlogCard({ blog }) {
+  console.log(blog);
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
       {blog.image && (
