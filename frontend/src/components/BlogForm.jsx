@@ -40,10 +40,45 @@ export default function BlogForm({ blog, onSuccess }) {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Prepare payload: category and tags as ObjectIds
+      // Step 1: Resolve existing tags + create missing ones
+      const tagIds = await Promise.all(
+        formData.tags.map(async (name) => {
+          if (!name.trim()) return null;
+
+          // Look for existing tag (case-insensitive)
+          const normalizedName = name.trim().toLowerCase();
+          const existingTag = tags.find(
+            (t) => t.name.toLowerCase() === normalizedName
+          );
+
+          if (existingTag) {
+            return existingTag._id;
+          }
+
+          // If not found → create new tag
+          try {
+            const newTagRes = await apiFetch("/tags", {
+              method: "POST",
+              body: JSON.stringify({
+                name: name.trim(),
+                slug: name.trim().toLowerCase().replace(/\s+/g, "-"), // simple slug
+              }),
+            });
+            // Update local tags list so future matches work without refetch
+            setTags((prev) => [...prev, newTagRes]);
+            return newTagRes._id;
+          } catch (err) {
+            console.error(`Failed to create tag: ${name}`, err);
+            return null;
+          }
+        })
+      );
+
+      const validTagIds = tagIds.filter(Boolean);
+
       const payload = {
         ...formData,
-        tags: formData.tags, // Already an array of ObjectIds
+        tags: validTagIds,
         category: formData.category || null,
       };
 
@@ -58,13 +93,13 @@ export default function BlogForm({ blog, onSuccess }) {
           body: JSON.stringify(payload),
         });
       }
+
       onSuccess();
     } catch (err) {
       alert("Error saving blog");
       console.error(err);
     }
   };
-
   const handleTagChange = (e) => {
     const selectedOptions = [...e.target.selectedOptions];
     setFormData({ ...formData, tags: selectedOptions.map((o) => o.value) });
@@ -107,18 +142,18 @@ export default function BlogForm({ blog, onSuccess }) {
           </option>
         ))}
       </select>
-      <select
-        multiple
-        value={formData.tags}
-        onChange={handleTagChange}
+      <input
+        type="text"
+        placeholder="Enter tags separated by commas"
+        value={formData.tags.join(", ")}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            tags: e.target.value.split(",").map((t) => t.trim()),
+          })
+        }
         className="w-full p-3 border rounded-lg"
-      >
-        {tags.map((tag) => (
-          <option key={tag._id} value={tag._id}>
-            {tag.name}
-          </option>
-        ))}
-      </select>
+      />
       <button
         type="submit"
         className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
