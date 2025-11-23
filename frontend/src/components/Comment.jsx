@@ -1,6 +1,4 @@
 const Comment = ({ comment, handleDelete, userInfo }) => {
-  // Delete comment function
-
   return (
     <div
       key={comment._id}
