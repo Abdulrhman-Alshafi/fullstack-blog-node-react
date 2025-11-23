@@ -6,12 +6,12 @@ export default function BlogForm({ blog, onSuccess }) {
     title: "",
     content: "",
     category: "",
-    tags: [], // this will store **tag names** for input
+    tags: [],
     image: "",
   });
 
   const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]); // all tags from backend with _id and name
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +31,7 @@ export default function BlogForm({ blog, onSuccess }) {
         title: blog.title,
         content: blog.content,
         category: blog.category?._id || "",
-        tags: blog.tags.map((t) => t.name) || [], // <-- display tag names
+        tags: blog.tags.map((t) => t.name) || [],
         image: blog.image || "",
       });
     }
@@ -40,7 +40,6 @@ export default function BlogForm({ blog, onSuccess }) {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Convert tag names to IDs (create new tags if necessary)
       const tagIds = await Promise.all(
         formData.tags.map(async (name) => {
           if (!name.trim()) return null;
@@ -52,7 +51,6 @@ export default function BlogForm({ blog, onSuccess }) {
 
           if (existingTag) return existingTag._id;
 
-          // Create new tag if it doesn't exist
           const newTagRes = await apiFetch("/tags", {
             method: "POST",
             body: JSON.stringify({
@@ -60,14 +58,14 @@ export default function BlogForm({ blog, onSuccess }) {
               slug: name.trim().toLowerCase().replace(/\s+/g, "-"),
             }),
           });
-          setTags((prev) => [...prev, newTagRes]); // update local tags list
+          setTags((prev) => [...prev, newTagRes]);
           return newTagRes._id;
         })
       );
 
       const payload = {
         ...formData,
-        tags: tagIds.filter(Boolean), // send only valid IDs
+        tags: tagIds.filter(Boolean),
         category: formData.category || null,
       };
 
@@ -130,7 +128,7 @@ export default function BlogForm({ blog, onSuccess }) {
       <input
         type="text"
         placeholder="Enter tags separated by commas"
-        value={formData.tags.join(", ")} // display names, not IDs
+        value={formData.tags.join(", ")}
         onChange={(e) =>
           setFormData({
             ...formData,

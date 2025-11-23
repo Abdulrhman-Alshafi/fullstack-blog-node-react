@@ -1,19 +1,28 @@
 import { useState, useEffect } from "react";
 import BlogForm from "../components/BlogForm";
 import apiFetch from "../api";
+import Loading from "../components/Loading";
 
 export default function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
+  const [loading, setLoading] = useState(true); // NEW
+  const [error, setError] = useState(null); // NEW
 
   // Function to fetch blogs
   const fetchMyBlogs = async () => {
     try {
+      setLoading(true);
+      setError(null);
+
       const res = await apiFetch("/blogs/myblogs");
       setMyBlogs(Array.isArray(res) ? res : res.blogs || []);
     } catch (err) {
       console.error("Failed to load blogs:", err);
+      setError("Failed to load your blogs. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,6 +53,27 @@ export default function Dashboard() {
     fetchMyBlogs();
   };
 
+  // ⏳ Loading UI
+  if (loading) {
+    return <Loading />;
+  }
+
+  // ❌ Error UI
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] text-center">
+        <p className="text-red-500 text-lg mb-4">{error}</p>
+        <button
+          onClick={fetchMyBlogs}
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // ✅ Main UI
   return (
     <div className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">My Dashboard</h1>

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import apiFetch from "../api";
 import CommentList from "../components/CommentList";
+import Loading from "../components/Loading";
 
 export default function BlogDetail() {
   const { id } = useParams();
@@ -24,7 +25,7 @@ export default function BlogDetail() {
     fetchBlogAndComments();
   }, [id]);
 
-  if (!blog) return <div className="text-center py-20">Loading...</div>;
+  if (!blog) return <Loading />;
 
   return (
     <div className="container mx-auto px-4 py-10">
