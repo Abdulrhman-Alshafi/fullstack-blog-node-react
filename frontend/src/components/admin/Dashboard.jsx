@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getBlogs, getCategories, getTags } from "../../api/api";
 import Loading from "../Loading"; // adjust path
 import ErrorUI from "../ErrorUI"; // adjust path
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -11,7 +12,7 @@ export default function Dashboard() {
     loading: true,
     error: null,
   });
-
+  const navigate = useNavigate();
   const fetchStats = async () => {
     setStats((prev) => ({ ...prev, loading: true, error: null }));
     try {
@@ -83,36 +84,40 @@ export default function Dashboard() {
           You're all set! Use the sidebar to manage blogs, categories, tags, and
           users. Your blog platform is running smoothly.
         </p>
-        <div className="mt-8 flex gap-4 flex-wrap">
-          <div className="bg-gray-50 px-6 py-4 rounded-lg">
-            <p className="text-sm text-gray-500">Active Users Today</p>
-            <p className="text-2xl font-bold text-gray-800">127</p>
-          </div>
-          <div className="bg-gray-50 px-6 py-4 rounded-lg">
-            <p className="text-sm text-gray-500">Published Blogs</p>
-            <p className="text-2xl font-bold text-green-600">
-              {stats.totalBlogs}
-            </p>
-          </div>
-          <div className="bg-gray-50 px-6 py-4 rounded-lg">
-            <p className="text-sm text-gray-500">Platform Status</p>
-            <p className="text-2xl font-bold text-green-600">Online</p>
-          </div>
-        </div>
       </div>
 
       {/* Quick Actions */}
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <button className="bg-indigo-600 text-white p-6 rounded-xl shadow-lg hover:bg-indigo-700 transition font-semibold text-lg">
+        <button
+          className="bg-indigo-600 text-white p-6 rounded-xl shadow-lg hover:bg-indigo-700 transition font-semibold text-lg"
+          onClick={() => {
+            navigate("/dashboard");
+          }}
+        >
           Create New Blog
         </button>
-        <button className="bg-emerald-600 text-white p-6 rounded-xl shadow-lg hover:bg-emerald-700 transition font-semibold text-lg">
+        <button
+          className="bg-emerald-600 text-white p-6 rounded-xl shadow-lg hover:bg-emerald-700 transition font-semibold text-lg"
+          onClick={() => {
+            navigate("/admin/categories");
+          }}
+        >
           Add Category
         </button>
-        <button className="bg-violet-600 text-white p-6 rounded-xl shadow-lg hover:bg-violet-700 transition font-semibold text-lg">
+        <button
+          className="bg-violet-600 text-white p-6 rounded-xl shadow-lg hover:bg-violet-700 transition font-semibold text-lg"
+          onClick={() => {
+            navigate("/admin/tags");
+          }}
+        >
           Add Tag
         </button>
-        <button className="bg-amber-600 text-white p-6 rounded-xl shadow-lg hover:bg-amber-700 transition font-semibold text-lg">
+        <button
+          className="bg-amber-600 text-white p-6 rounded-xl shadow-lg hover:bg-amber-700 transition font-semibold text-lg"
+          onClick={() => {
+            navigate("/admin/users");
+          }}
+        >
           View All Users
         </button>
       </div>
