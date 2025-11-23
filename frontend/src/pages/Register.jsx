@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import apiFetch from "../api";
+import { register } from "../api/api";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -13,10 +13,7 @@ export default function Register() {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const res = await apiFetch("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(formData),
-      });
+      const res = await register(formData);
       localStorage.setItem("userInfo", JSON.stringify(res));
       localStorage.setItem("token", res.token);
       navigate("/dashboard");

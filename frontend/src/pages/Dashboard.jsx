@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import BlogForm from "../components/BlogForm";
-import apiFetch from "../api";
 import Loading from "../components/Loading";
+import { deleteBlog, getMyBlogs } from "../api/api";
 
 export default function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
@@ -10,13 +10,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true); // NEW
   const [error, setError] = useState(null); // NEW
 
-  // Function to fetch blogs
   const fetchMyBlogs = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await apiFetch("/blogs/myblogs");
+      const res = await getMyBlogs(); // use modular API function
       setMyBlogs(Array.isArray(res) ? res : res.blogs || []);
     } catch (err) {
       console.error("Failed to load blogs:", err);
@@ -34,7 +33,7 @@ export default function Dashboard() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await apiFetch(`/blogs/${id}`, { method: "DELETE" });
+      await deleteBlog(id); // use modular API function
       fetchMyBlogs();
     } catch (err) {
       alert("Failed to delete blog");
@@ -53,12 +52,12 @@ export default function Dashboard() {
     fetchMyBlogs();
   };
 
-  // ⏳ Loading UI
+  // Loading UI
   if (loading) {
     return <Loading />;
   }
 
-  // ❌ Error UI
+  // Error UI
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] text-center">
@@ -73,7 +72,7 @@ export default function Dashboard() {
     );
   }
 
-  // ✅ Main UI
+  // Main UI
   return (
     <div className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">My Dashboard</h1>

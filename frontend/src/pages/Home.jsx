@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import apiFetch from "../api";
 import BlogCard from "../components/BlogCard";
 import Loading from "../components/Loading";
+import { getBlogs } from "../api/api";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
@@ -13,7 +13,7 @@ const Home = () => {
       setLoading(true);
       setError(null);
 
-      const res = await apiFetch("/blogs");
+      const res = await getBlogs();
       setBlogs(res);
     } catch (err) {
       console.error("Failed to fetch blogs:", err);

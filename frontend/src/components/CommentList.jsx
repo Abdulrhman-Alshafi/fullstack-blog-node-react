@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import apiFetch from "../api";
+
 import Comment from "./Comment";
+import { createComment, deleteComment, getComments } from "../api/api";
 
 export default function CommentList({ blogId, initialComments = [] }) {
   const [comments, setComments] = useState(initialComments);
@@ -12,10 +13,10 @@ export default function CommentList({ blogId, initialComments = [] }) {
 
   // Fetch comments on mount
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchAllComments = async () => {
       setFetching(true);
       try {
-        const data = await apiFetch(`/blogs/${blogId}/comments`);
+        const data = await getComments(blogId); // modular function
         setComments(data);
       } catch (err) {
         console.error("Failed to fetch comments:", err);
@@ -23,20 +24,17 @@ export default function CommentList({ blogId, initialComments = [] }) {
         setFetching(false);
       }
     };
-    fetchComments();
+    fetchAllComments();
   }, [blogId]);
 
-  //ading comment
+  // Add comment
   const submitComment = async (e) => {
     e.preventDefault();
     if (!content.trim()) return;
 
     setLoading(true);
     try {
-      const data = await apiFetch(`/blogs/${blogId}/comments`, {
-        method: "POST",
-        body: JSON.stringify({ content }),
-      });
+      const data = await createComment(blogId, { content });
       setComments([data, ...comments]);
       setContent("");
     } catch (err) {
@@ -46,13 +44,13 @@ export default function CommentList({ blogId, initialComments = [] }) {
     }
   };
 
-  // Delete comment function
+  // Delete comment
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this comment?"))
       return;
 
     try {
-      await apiFetch(`/blogs/${blogId}/comments/${id}`, { method: "DELETE" });
+      await deleteComment(blogId, id);
       setComments(comments.filter((comment) => comment._id !== id));
     } catch (err) {
       alert(err.message || "Failed to delete comment");

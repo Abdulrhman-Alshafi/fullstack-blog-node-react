@@ -1,7 +1,6 @@
-// api.js
 const BASE_URL = "/api";
 
-async function apiFetch(endpoint, options = {}) {
+export default async function apiFetch(endpoint, options = {}) {
   try {
     const token = localStorage.getItem("token");
 
@@ -11,11 +10,7 @@ async function apiFetch(endpoint, options = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
-    const config = {
-      ...options,
-      headers,
-    };
-
+    const config = { ...options, headers };
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
 
     if (!response.ok) {
@@ -27,10 +22,7 @@ async function apiFetch(endpoint, options = {}) {
 
     return await response.json();
   } catch (error) {
-    // Optional: handle or log errors globally
     console.error("API error:", error);
     throw error;
   }
 }
-
-export default apiFetch;

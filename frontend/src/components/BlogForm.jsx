@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import apiFetch from "../api";
+import {
+  createBlog,
+  createTag,
+  getCategories,
+  getTags,
+  updateBlog,
+} from "../api/api";
 
 export default function BlogForm({ blog, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -16,8 +22,8 @@ export default function BlogForm({ blog, onSuccess }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const catRes = await apiFetch("/categories");
-        const tagRes = await apiFetch("/tags");
+        const catRes = await getCategories();
+        const tagRes = await getTags();
         setCategories(catRes);
         setTags(tagRes);
       } catch (err) {
@@ -40,6 +46,7 @@ export default function BlogForm({ blog, onSuccess }) {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      // Ensure tags exist or create new ones
       const tagIds = await Promise.all(
         formData.tags.map(async (name) => {
           if (!name.trim()) return null;
@@ -51,12 +58,9 @@ export default function BlogForm({ blog, onSuccess }) {
 
           if (existingTag) return existingTag._id;
 
-          const newTagRes = await apiFetch("/tags", {
-            method: "POST",
-            body: JSON.stringify({
-              name: name.trim(),
-              slug: name.trim().toLowerCase().replace(/\s+/g, "-"),
-            }),
+          const newTagRes = await createTag({
+            name: name.trim(),
+            slug: normalizedName.replace(/\s+/g, "-"),
           });
           setTags((prev) => [...prev, newTagRes]);
           return newTagRes._id;
@@ -70,15 +74,9 @@ export default function BlogForm({ blog, onSuccess }) {
       };
 
       if (blog) {
-        await apiFetch(`/blogs/${blog._id}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
+        await updateBlog(blog._id, payload);
       } else {
-        await apiFetch("/blogs", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
+        await createBlog(payload);
       }
 
       onSuccess();

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import apiFetch from "../api";
 import CommentList from "../components/CommentList";
 import Loading from "../components/Loading";
+import { getBlogById, getComments } from "../api/api";
 
 export default function BlogDetail() {
   const { id } = useParams();
@@ -13,8 +13,8 @@ export default function BlogDetail() {
   useEffect(() => {
     const fetchBlogAndComments = async () => {
       try {
-        const blogRes = await apiFetch(`/blogs/${id}`);
-        const commentsRes = await apiFetch(`/blogs/${id}/comments`);
+        const blogRes = await getBlogById(id);
+        const commentsRes = await getComments(id);
         setBlog(blogRes);
         setComments(commentsRes);
       } catch (err) {

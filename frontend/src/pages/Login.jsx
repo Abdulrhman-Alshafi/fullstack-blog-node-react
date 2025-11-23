@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import apiFetch from "../api";
+import { login } from "../api/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,10 +10,7 @@ export default function Login() {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const res = await apiFetch("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await login({ email, password });
       localStorage.setItem("userInfo", JSON.stringify(res));
       localStorage.setItem("token", res.token);
       navigate("/dashboard");
