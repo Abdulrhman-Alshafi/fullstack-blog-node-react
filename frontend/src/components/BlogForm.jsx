@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
 import {
   createBlog,
   createTag,
@@ -8,17 +12,38 @@ import {
 } from "../api/api";
 
 export default function BlogForm({ blog, onSuccess }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    category: "",
-    tags: [],
-    image: "",
+  //  Yup Schema
+  const schema = yup.object({
+    title: yup.string().required("Title is required"),
+    content: yup.string().required("Content is required"),
+    image: yup.string().url("Invalid Image URL").nullable(),
+    category: yup.string().nullable(),
+    tags: yup.array().of(yup.string().trim()),
+  });
+
+  //  useForm
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      title: "",
+      content: "",
+      image: "",
+      category: "",
+      tags: [],
+    },
   });
 
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
 
+  //  Load categories + tags + blog
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,42 +51,44 @@ export default function BlogForm({ blog, onSuccess }) {
         const tagRes = await getTags();
         setCategories(catRes);
         setTags(tagRes);
+
+        if (blog) {
+          reset({
+            title: blog.title,
+            content: blog.content,
+            category: blog.category?._id || "",
+            tags: blog.tags.map((t) => t.name),
+            image: blog.image || "",
+          });
+        }
       } catch (err) {
         console.error("Failed to fetch categories or tags:", err);
       }
     };
+
     fetchData();
+  }, [blog, reset]);
 
-    if (blog) {
-      setFormData({
-        title: blog.title,
-        content: blog.content,
-        category: blog.category?._id || "",
-        tags: blog.tags.map((t) => t.name) || [],
-        image: blog.image || "",
-      });
-    }
-  }, [blog]);
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  //  Submit Handler (RHF version)
+  const onSubmit = async (formData) => {
     try {
       // Ensure tags exist or create new ones
       const tagIds = await Promise.all(
         formData.tags.map(async (name) => {
-          if (!name.trim()) return null;
+          const normalized = name.trim().toLowerCase();
+          if (!normalized) return null;
 
-          const normalizedName = name.trim().toLowerCase();
-          const existingTag = tags.find(
-            (t) => t.name.toLowerCase() === normalizedName
+          const existing = tags.find(
+            (t) => t.name.toLowerCase() === normalized
           );
 
-          if (existingTag) return existingTag._id;
+          if (existing) return existing._id;
 
           const newTagRes = await createTag({
             name: name.trim(),
-            slug: normalizedName.replace(/\s+/g, "-"),
+            slug: normalized.replace(/\s+/g, "-"),
           });
+
           setTags((prev) => [...prev, newTagRes]);
           return newTagRes._id;
         })
@@ -70,7 +97,6 @@ export default function BlogForm({ blog, onSuccess }) {
       const payload = {
         ...formData,
         tags: tagIds.filter(Boolean),
-        category: formData.category || null,
       };
 
       if (blog) {
@@ -86,34 +112,38 @@ export default function BlogForm({ blog, onSuccess }) {
     }
   };
 
+  const tagInput = watch("tags");
+
   return (
-    <form onSubmit={submitHandler} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Title */}
       <input
-        type="text"
+        {...register("title")}
         placeholder="Title"
-        value={formData.title}
-        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         className="w-full p-3 border rounded-lg"
-        required
       />
+      <p className="text-red-500">{errors.title?.message}</p>
+
+      {/* Content */}
       <textarea
+        {...register("content")}
         placeholder="Content"
         rows="10"
-        value={formData.content}
-        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
         className="w-full p-3 border rounded-lg"
-        required
       />
+      <p className="text-red-500">{errors.content?.message}</p>
+
+      {/* Image URL */}
       <input
-        type="text"
+        {...register("image")}
         placeholder="Image URL (optional)"
-        value={formData.image}
-        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
         className="w-full p-3 border rounded-lg"
       />
+      <p className="text-red-500">{errors.image?.message}</p>
+
+      {/* Category */}
       <select
-        value={formData.category}
-        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+        {...register("category")}
         className="w-full p-3 border rounded-lg"
       >
         <option value="">Select Category</option>
@@ -123,18 +153,21 @@ export default function BlogForm({ blog, onSuccess }) {
           </option>
         ))}
       </select>
+
+      {/* Tags Input */}
       <input
         type="text"
         placeholder="Enter tags separated by commas"
-        value={formData.tags.join(", ")}
+        value={tagInput.join(", ")}
         onChange={(e) =>
-          setFormData({
-            ...formData,
-            tags: e.target.value.split(",").map((t) => t.trim()),
-          })
+          setValue(
+            "tags",
+            e.target.value.split(",").map((t) => t.trim())
+          )
         }
         className="w-full p-3 border rounded-lg"
       />
+
       <button
         type="submit"
         className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"

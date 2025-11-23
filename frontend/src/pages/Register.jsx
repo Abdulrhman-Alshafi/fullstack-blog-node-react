@@ -1,19 +1,38 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../api/api";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { register as registerUser } from "../api/api";
 
 export default function Register() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
   const navigate = useNavigate();
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  // Yup Schema
+  const schema = yup.object({
+    name: yup.string().required("Name is required"),
+    email: yup
+      .string()
+      .email("Invalid email format")
+      .required("Email is required"),
+    password: yup
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
+  });
+
+  // React Hook Form Setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  // Submit Handler
+  const onSubmit = async (data) => {
     try {
-      const res = await register(formData);
+      const res = await registerUser(data);
       localStorage.setItem("userInfo", JSON.stringify(res));
       localStorage.setItem("token", res.token);
       navigate("/dashboard");
@@ -25,38 +44,57 @@ export default function Register() {
   return (
     <div className="max-w-md mx-auto mt-20">
       <form
-        onSubmit={submitHandler}
+        onSubmit={handleSubmit(onSubmit)}
         className="bg-white shadow-lg rounded-lg p-8"
       >
         <h2 className="text-3xl font-bold text-center mb-8">Register</h2>
+
+        {/* NAME */}
         <input
           type="text"
           placeholder="Name"
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full p-3 border rounded mb-4"
-          required
+          {...register("name")}
+          className={`w-full p-3 border rounded mb-1 ${
+            errors.name ? "border-red-500" : "border-gray-300"
+          }`}
         />
+        {errors.name && (
+          <p className="text-red-600 text-sm mb-4">{errors.name.message}</p>
+        )}
+
+        {/* EMAIL */}
         <input
           type="email"
           placeholder="Email"
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full p-3 border rounded mb-4"
-          required
+          {...register("email")}
+          className={`w-full p-3 border rounded mb-1 ${
+            errors.email ? "border-red-500" : "border-gray-300"
+          }`}
         />
+        {errors.email && (
+          <p className="text-red-600 text-sm mb-4">{errors.email.message}</p>
+        )}
+
+        {/* PASSWORD */}
         <input
           type="password"
           placeholder="Password"
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          className="w-full p-3 border rounded mb-6"
-          required
+          {...register("password")}
+          className={`w-full p-3 border rounded mb-1 ${
+            errors.password ? "border-red-500" : "border-gray-300"
+          }`}
         />
+        {errors.password && (
+          <p className="text-red-600 text-sm mb-4">{errors.password.message}</p>
+        )}
+
+        {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+          disabled={isSubmitting}
+          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
         >
-          Register
+          {isSubmitting ? "Registering..." : "Register"}
         </button>
       </form>
     </div>
