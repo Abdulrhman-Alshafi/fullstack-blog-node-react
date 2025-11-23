@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import CommentList from "../components/CommentList";
 import Loading from "../components/Loading";
 import { getBlogById, getComments } from "../api/api";
+import BlogDetailCard from "../components/BlogDetailCard";
 
 export default function BlogDetail() {
   const { id } = useParams();
@@ -29,26 +30,7 @@ export default function BlogDetail() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <article className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        {blog.image && (
-          <img
-            src={blog.image}
-            alt={blog.title}
-            className="w-full h-96 object-cover"
-          />
-        )}
-        <div className="p-8">
-          <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
-          <div className="text-gray-600 mb-6">
-            By <strong>{blog.author.name}</strong> |{" "}
-            {new Date(blog.createdAt).toLocaleDateString()}
-          </div>
-          <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
-        </div>
-      </article>
+      <BlogDetailCard blog={blog} />
 
       <CommentList
         blogId={id}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import BlogForm from "../components/BlogForm";
 import Loading from "../components/Loading";
 import { deleteBlog, getMyBlogs } from "../api/api";
+import MyBlogCard from "../components/MyBlogCard";
 
 export default function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
@@ -59,17 +60,7 @@ export default function Dashboard() {
 
   // Error UI
   if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-center">
-        <p className="text-red-500 text-lg mb-4">{error}</p>
-        <button
-          onClick={fetchMyBlogs}
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Retry
-        </button>
-      </div>
-    );
+    return <ErrorUI error={error} onRetry={fetchMyBlogs} />;
   }
 
   // Main UI
@@ -95,35 +86,12 @@ export default function Dashboard() {
       <div className="grid gap-6">
         {myBlogs.length > 0 ? (
           myBlogs.map((blog) => (
-            <div
+            <MyBlogCard
               key={blog._id}
-              className="bg-white p-6 rounded-lg shadow flex flex-col sm:flex-row sm:justify-between sm:items-center"
-            >
-              <div>
-                <h3 className="text-xl font-bold">{blog.title}</h3>
-                <p className="text-gray-600">
-                  Published: {new Date(blog.createdAt).toLocaleDateString()}
-                </p>
-                <p className="text-gray-500">
-                  Category: {blog.category?.name || "Uncategorized"}
-                </p>
-              </div>
-
-              <div className="mt-4 sm:mt-0 space-x-2">
-                <button
-                  onClick={() => handleEdit(blog)}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => handleDelete(blog._id)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+              blog={blog}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+            />
           ))
         ) : (
           <p className="text-gray-500">You have no blogs yet.</p>

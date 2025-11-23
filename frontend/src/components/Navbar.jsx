@@ -1,8 +1,18 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import MobileMenu from "./MobileMenu";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("userInfo"));
+  let user = null;
+
+  try {
+    user = JSON.parse(localStorage.getItem("userInfo"));
+  } catch {
+    user = null;
+  }
+
+  const [open, setOpen] = useState(false);
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
@@ -16,10 +26,49 @@ export default function Navbar() {
         <Link to="/" className="text-2xl font-bold">
           MyBlog
         </Link>
-        <div className="flex gap-6 items-center">
+
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden inline-flex items-center justify-center p-2 rounded-md focus:outline-none"
+        >
+          {!open ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          )}
+        </button>
+
+        <div className="hidden md:flex gap-6 items-center">
           <Link to="/" className="hover:underline">
             Home
           </Link>
+
           {user ? (
             <>
               <Link to="/dashboard" className="hover:underline">
@@ -45,6 +94,14 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {open && (
+        <MobileMenu
+          user={user}
+          close={() => setOpen(false)}
+          logout={logoutHandler}
+        />
+      )}
     </nav>
   );
 }
