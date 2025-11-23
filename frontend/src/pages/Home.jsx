@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import BlogCard from "../components/BlogCard";
 import Loading from "../components/Loading";
 import { getBlogs } from "../api/api";
+import ErrorUI from "../components/ErrorUI";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);

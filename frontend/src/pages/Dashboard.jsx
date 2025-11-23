@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import BlogForm from "../components/BlogForm";
 import Loading from "../components/Loading";
-import { deleteBlog, getMyBlogs } from "../api/api";
 import MyBlogCard from "../components/MyBlogCard";
+import ErrorUI from "../components/ErrorUI";
+import { deleteBlog, getMyBlogs } from "../api/api";
 
 export default function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
