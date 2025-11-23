@@ -1,4 +1,3 @@
-// api.js
 import apiFetch from "./apiFetch";
 import {
   AuthEndpoints,

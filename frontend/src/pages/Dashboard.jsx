@@ -7,15 +7,15 @@ export default function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
-  const [loading, setLoading] = useState(true); // NEW
-  const [error, setError] = useState(null); // NEW
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchMyBlogs = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await getMyBlogs(); // use modular API function
+      const res = await getMyBlogs();
       setMyBlogs(Array.isArray(res) ? res : res.blogs || []);
     } catch (err) {
       console.error("Failed to load blogs:", err);
@@ -33,7 +33,7 @@ export default function Dashboard() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await deleteBlog(id); // use modular API function
+      await deleteBlog(id);
       fetchMyBlogs();
     } catch (err) {
       alert("Failed to delete blog");
