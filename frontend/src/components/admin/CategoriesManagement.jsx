@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { getCategories, createCategory, deleteCategory } from "../../api/api";
+
 import Loading from "../Loading";
 import ErrorUI from "../ErrorUI";
+import ItemCard from "./ItemCard";
+import CreateItemForm from "./CreateItemFrom";
 
 export default function CategoriesManagement() {
   const [categories, setCategories] = useState([]);
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const load = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const data = await getCategories();
       setCategories(data);
@@ -28,13 +30,10 @@ export default function CategoriesManagement() {
     load();
   }, []);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (data) => {
     try {
-      await createCategory({ name, slug });
+      await createCategory(data);
       alert("Category created successfully!");
-      setName("");
-      setSlug("");
       load();
     } catch (err) {
       alert(err.response?.message || "Failed to create category");
@@ -51,8 +50,7 @@ export default function CategoriesManagement() {
     }
 
     try {
-      await deleteCategory(id); // ← uses your clean API
-      alert("Category deleted!");
+      await deleteCategory(id);
       load();
     } catch (err) {
       alert(err.response?.message || "Failed to delete category");
@@ -68,33 +66,12 @@ export default function CategoriesManagement() {
         Manage Categories
       </h1>
 
-      {/* Create Form */}
-      <form
-        onSubmit={submit}
-        className="bg-white p-8 rounded-xl shadow-lg mb-10 max-w-2xl"
-      >
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <input
-            type="text"
-            placeholder="Category Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          />
-          <input
-            type="text"
-            placeholder="slug-example"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          />
-        </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition">
-          Add Category
-        </button>
-      </form>
+      {/* Shared Form */}
+      <CreateItemForm
+        title="Create Category"
+        buttonText="Add Category"
+        onSubmit={handleSubmit}
+      />
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -104,25 +81,13 @@ export default function CategoriesManagement() {
           </p>
         ) : (
           categories.map((cat) => (
-            <div
+            <ItemCard
               key={cat._id}
-              className="relative group bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 cursor-default"
-            >
-              <div className="text-center">
-                <h3 className="font-bold text-2xl mb-2">{cat.name}</h3>
-                <p className="text-lg opacity-90">/{cat.slug}</p>
-              </div>
-
-              {/* Delete Button - Hover Only */}
-              <button
-                onClick={() => handleDelete(cat._id, cat.name)}
-                className="absolute top-3 right-3 w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-2xl font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
-                title="Delete category"
-                aria-label="Delete category"
-              >
-                ×
-              </button>
-            </div>
+              id={cat._id}
+              name={cat.name}
+              slug={cat.slug}
+              onDelete={handleDelete}
+            />
           ))
         )}
       </div>

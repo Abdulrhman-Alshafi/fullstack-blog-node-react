@@ -1,17 +1,23 @@
-// src/components/admin/UsersManagement.jsx
 import { useState, useEffect } from "react";
 import { getAllUsers, deleteUser, toggleUserAdmin } from "../../api/api";
+import Loading from "../Loading";
+import ErrorUI from "../ErrorUI";
 
 export default function UsersManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadUsers = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
       const data = await getAllUsers();
       setUsers(data);
     } catch (err) {
-      alert("Failed to load users", err);
+      console.error(err);
+      setError("Failed to load users. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -23,6 +29,7 @@ export default function UsersManagement() {
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this user permanently?")) return;
+
     try {
       await deleteUser(id);
       setUsers(users.filter((u) => u._id !== id));
@@ -41,8 +48,11 @@ export default function UsersManagement() {
     }
   };
 
-  if (loading)
-    return <div className="text-center py-20 text-2xl">Loading users...</div>;
+  // Loading UI
+  if (loading) return <Loading />;
+
+  // Error UI
+  if (error) return <ErrorUI error={error} onRetry={loadUsers} />;
 
   return (
     <div>
@@ -66,11 +76,13 @@ export default function UsersManagement() {
               </th>
             </tr>
           </thead>
+
           <tbody className="divide-y divide-gray-200">
             {users.map((user) => (
               <tr key={user._id} className="hover:bg-gray-50 transition">
                 <td className="px-6 py-4 font-medium">{user.name}</td>
                 <td className="px-6 py-4 text-gray-600">{user.email}</td>
+
                 <td className="px-6 py-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -82,6 +94,7 @@ export default function UsersManagement() {
                     {user.isAdmin ? "Admin" : "User"}
                   </span>
                 </td>
+
                 <td className="px-6 py-4 flex gap-4">
                   <button
                     onClick={() => handleToggleAdmin(user._id)}
@@ -91,6 +104,7 @@ export default function UsersManagement() {
                   >
                     {user.isAdmin ? "Remove Admin" : "Make Admin"}
                   </button>
+
                   <button
                     onClick={() => handleDelete(user._id)}
                     className="text-red-600 font-semibold hover:underline"

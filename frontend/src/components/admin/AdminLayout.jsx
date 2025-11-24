@@ -2,11 +2,11 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const menu = [
-  { path: "/admin", label: "Dashboard", icon: "🏠" },
-  { path: "/admin/blogs", label: "All Blogs", icon: "📝" },
-  { path: "/admin/categories", label: "Categories", icon: "📂" },
-  { path: "/admin/tags", label: "Tags", icon: "🏷️" },
-  { path: "/admin/users", label: "Users", icon: "👤" },
+  { path: "/admin", label: "Dashboard" },
+  { path: "/admin/blogs", label: "All Blogs" },
+  { path: "/admin/categories", label: "Categories" },
+  { path: "/admin/tags", label: "Tags" },
+  { path: "/admin/users", label: "Users" },
 ];
 
 export default function AdminLayout() {
