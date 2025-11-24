@@ -1,3 +1,4 @@
+import Blog from "../models/Blog.js";
 import Category from "../models/Category.js";
 
 //get categories function
@@ -25,6 +26,24 @@ const createCategory = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//delete category function
+export const deleteCategory = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) return res.status(404).json({ message: "Not found" });
+
+    await Blog.updateMany(
+      { category: req.params.id },
+      { $unset: { category: "" } }
+    );
+
+    await category.deleteOne();
+    res.json({ message: "Category removed" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 

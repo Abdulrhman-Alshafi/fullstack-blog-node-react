@@ -1,4 +1,5 @@
 import Tag from "../models/Tag.js";
+import Blog from "../models/Blog.js";
 
 //get tags function
 const getTags = async (req, res) => {
@@ -11,7 +12,7 @@ const getTags = async (req, res) => {
   }
 };
 
-//create Tags functions
+//create Tags function
 const createTag = async (req, res) => {
   try {
     const { name, slug } = req.body;
@@ -25,6 +26,26 @@ const createTag = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//delete tag function
+export const deleteTag = async (req, res) => {
+  try {
+    const tag = await Tag.findById(req.params.id);
+    if (!tag) {
+      return res.status(404).json({ message: "Tag not found" });
+    }
+    await Blog.updateMany(
+      { tags: req.params.id },
+      { $pull: { tags: req.params.id } }
+    );
+
+    await tag.deleteOne();
+    res.json({ message: "Tag removed" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

@@ -5,6 +5,7 @@ import {
   CommentEndpoints,
   CategoryEndpoints,
   TagEndpoints,
+  UserEndpoints,
 } from "./endpoints";
 
 // ----- Auth -----
@@ -53,8 +54,21 @@ export const createCategory = (data) =>
     method: "POST",
     body: JSON.stringify(data),
   });
+export const deleteCategory = (id) =>
+  apiFetch(CategoryEndpoints.CATEGORY_DETAILS(id), { method: "DELETE" });
 
 // ----- Tags -----
 export const getTags = () => apiFetch(TagEndpoints.TAGS);
 export const createTag = (data) =>
   apiFetch(TagEndpoints.TAGS, { method: "POST", body: JSON.stringify(data) });
+export const deleteTag = (id) =>
+  apiFetch(TagEndpoints.TAG_DETAILS(id), { method: "DELETE" });
+
+// ----- users -----
+export const getAllUsers = () => apiFetch(UserEndpoints.USERS);
+
+export const deleteUser = (id) =>
+  apiFetch(UserEndpoints.DELETE_USER(id), { method: "DELETE" });
+
+export const toggleUserAdmin = (id) =>
+  apiFetch(UserEndpoints.TOGGLE_ADMIN(id), { method: "PATCH" });

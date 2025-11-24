@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getBlogs, getCategories, getTags } from "../../api/api";
-import Loading from "../Loading"; // adjust path
-import ErrorUI from "../ErrorUI"; // adjust path
+import Loading from "../Loading";
+import ErrorUI from "../ErrorUI";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {

@@ -21,9 +21,18 @@ export const CommentEndpoints = {
 //category
 export const CategoryEndpoints = {
   CATEGORIES: "/categories",
+  CATEGORY_DETAILS: (id) => `/categories/${id}`,
 };
 
 //tag
 export const TagEndpoints = {
   TAGS: "/tags",
+  TAG_DETAILS: (id) => `/tags/${id}`,
+};
+
+//user
+export const UserEndpoints = {
+  USERS: "/users",
+  DELETE_USER: (id) => `/users/${id}`,
+  TOGGLE_ADMIN: (id) => `/users/${id}/toggle-admin`,
 };
