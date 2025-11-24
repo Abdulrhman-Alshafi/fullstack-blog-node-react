@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
@@ -13,7 +12,7 @@ export default function Navbar() {
     const stored = localStorage.getItem("userInfo");
     if (stored) user = JSON.parse(stored);
   } catch (err) {
-    console.error("Failed to parse userInfo");
+    console.error("Failed to parse userInfo", err);
   }
 
   const logoutHandler = () => {
