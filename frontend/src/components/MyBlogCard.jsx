@@ -1,5 +1,3 @@
-import React from "react";
-
 const MyBlogCard = ({ blog, handleEdit, handleDelete }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow flex flex-col sm:flex-row sm:justify-between sm:items-center">

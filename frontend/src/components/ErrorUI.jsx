@@ -1,5 +1,3 @@
-import React from "react";
-
 const ErrorUI = ({ error, onRetry }) => {
   return (
     <div className="flex flex-col items-center justify-center h-[70vh] text-center">

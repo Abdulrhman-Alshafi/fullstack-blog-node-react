@@ -69,7 +69,7 @@ export default function BlogForm({ blog, onSuccess }) {
     fetchData();
   }, [blog, reset]);
 
-  //  Submit Handler (RHF version)
+  //  Submit Handler
   const onSubmit = async (formData) => {
     try {
       // Ensure tags exist or create new ones
