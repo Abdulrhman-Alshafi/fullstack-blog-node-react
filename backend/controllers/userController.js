@@ -24,7 +24,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-//make/reomve admin
+//make/reomve admin function
 export const toggleAdmin = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);

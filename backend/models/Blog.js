@@ -1,5 +1,5 @@
 import mongoose, { connect } from "mongoose";
-
+// blog shema
 const blogSchema = mongoose.Schema(
   {
     title: {

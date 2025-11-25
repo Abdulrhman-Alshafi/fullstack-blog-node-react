@@ -15,13 +15,20 @@ connectDB();
 const app = express();
 app.use(express.json());
 
+//auth routes
 app.use("/api/auth", authRoutes);
+//blog routes
 app.use("/api/blogs", blogRoutes);
+//comment routes
 app.use("/api/blogs/:blogId/comments", commentRoutes);
+//categories routes
 app.use("/api/categories", categoryRoutes);
+//tags routes
 app.use("/api/tags", tagRoutes);
+//user routes
 app.use("/api/users", userRoutes);
 
+//handle error middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+//comment schema
 const commentSchema = mongoose.Schema(
   {
     content: {
