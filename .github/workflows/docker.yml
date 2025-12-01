@@ -29,7 +29,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # -------- BACKEND IMAGE --------
       - name: Build & push backend
         uses: docker/build-push-action@v6
         with:
@@ -38,11 +37,10 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/myapp-backend:latest
-            ghcr.io/${{ github.repository }}-backend:latest
+            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # -------- FRONTEND IMAGE --------
       - name: Build & push frontend
         uses: docker/build-push-action@v6
         with:
@@ -51,7 +49,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/myapp-frontend:latest
-            ghcr.io/${{ github.repository }}-frontend:latest
+            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -79,9 +77,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run backend tests inside container
+      - name: Run backend tests
         run: |
           docker run --network host \
             -e MONGO_URL=mongodb://root:password@localhost:27017 \
             -e REDIS_URL=redis://localhost:6379 \
-            ghcr.io/${{ github.repository }}-backend:latest npm test
+            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-backend:latest npm test
