@@ -2,11 +2,10 @@ name: Docker CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-# Required to push to GHCR
 permissions:
   contents: read
   packages: write
@@ -14,7 +13,6 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,7 +33,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ────────────────────── BACKEND ──────────────────────
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
@@ -48,7 +45,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ────────────────────── FRONTEND ──────────────────────
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
@@ -70,15 +66,28 @@ jobs:
         env:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: password
-        ports: [27017:27017]
-        options: --health-cmd="mongosh --eval 'db.runCommand({ping: 1})'" --health-interval=10s --health-timeout=5s --health-retries=5
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.runCommand(\"ping\": 1)'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
       redis:
         image: redis:7
-        ports: [6379:6379]
-        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Run backend tests
         run: |
           docker run --network host \
