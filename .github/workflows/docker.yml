@@ -6,12 +6,22 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write # Needed to push to GHCR
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      OWNER_LOWER: ${{ lower(github.repository_owner) }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up QEMU (for multi-platform support, optional)
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -29,41 +39,49 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push backend
+      - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/myapp-backend:latest
-            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-backend:latest
+            ghcr.io/${{ env.OWNER_LOWER }}/fullstack-blog-node-react-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
 
-      - name: Build & push frontend
+      - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/myapp-frontend:latest
-            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-frontend:latest
+            ghcr.io/${{ env.OWNER_LOWER }}/fullstack-blog-node-react-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
 
   test-backend:
     needs: build-and-push
     runs-on: ubuntu-latest
+    env:
+      OWNER_LOWER: ${{ lower(github.repository_owner) }}
 
     services:
       mongodb:
         image: mongo:7
-        ports: ["27017:27017"]
         env:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: password
+        ports: [27017:27017]
         options: >-
           --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
           --health-interval=10s
@@ -72,14 +90,18 @@ jobs:
 
       redis:
         image: redis:7
-        ports: ["6379:6379"]
+        ports: [6379:6379]
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run backend tests
+      - name: Pull backend image & run tests
         run: |
+          docker pull ghcr.io/${{ env.OWNER_LOWER }}/fullstack-blog-node-react-backend:latest
           docker run --network host \
             -e MONGO_URL=mongodb://root:password@localhost:27017 \
             -e REDIS_URL=redis://localhost:6379 \
-            ghcr.io/${{ github.repository_owner }}/fullstack-blog-node-react-backend:latest npm test
+            ghcr.io/${{ env.OWNER_LOWER }}/fullstack-blog-node-react-backend:latest \
+            npm test
